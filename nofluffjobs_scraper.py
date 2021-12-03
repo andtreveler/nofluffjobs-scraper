@@ -15,7 +15,7 @@ Link = 'https://nofluffjobs.com/jobs/remote?criteria=seniority%3Djunior&page='
 
 # Get specific page content and parse it with BeautifulSoup
 def getPageOffers(pageNumber):
-# Get page content
+    # Get page content
     URL = Link + str(pageNumber)
     while (True):
         try:
@@ -24,33 +24,59 @@ def getPageOffers(pageNumber):
         except:
             print("Error while getting page content. Will wait 2 second and try again")
             sleep(5)
-# Parse content by tag 'a' and id that contains 'nfjPostingListItem-'
+    # Parse content by tag 'a' and id that contains 'nfjPostingListItem-' - it is job offers
     soup = BeautifulSoup(page.content,'html.parser')
     results = soup.find_all('a',id = re.compile('^nfjPostingListItem-'))
-# Return finded offers 
+    # Return finded offers 
     return(results)
+# Get specified offer info(required skills)
+def getOfferInfo(URL):
+    # Get page content
+    while (True):
+        try:
+            page = requests.get(URL)
+            break
+        except:
+            print("Error while getting page content. Will wait 2 second and try again")
+            sleep(5)
+    soup = BeautifulSoup(page.content,'html.parser')
+    skills = []
+    # Parse content of requirements block
+    # Get first buttons from 'must have' and 'nice to have' - they have different declaration
+    results1 = soup.find_all('a',class_='btn btn-outline-success btn-sm text-truncate')
+    for result in results1:
+        skills.append(result.get_text())
+
+    # Get another skills
+    results2 = soup.find_all('button',class_='btn btn-outline-success btn-sm no-cursor text-truncate')
+    for result in results2:
+        skills.append(result.get_text())
+
+    # Return skills set
+    return(skills)
 
 # Create xlsx file, worksheet and fill out header
 def initializeTable():
-# Create an new Excel file 
+    # Create an new Excel file 
     workbook = xlsxwriter.Workbook('jobs.xlsx')
-# Add worksheet
+    # Add worksheet
     worksheet = workbook.add_worksheet()
-# Write headers
+    # Write headers
     worksheet.write(0, 0, 'Title')
     worksheet.write(0, 1, 'Salary Start')
     worksheet.write(0, 2, 'Salary End')
     worksheet.write(0, 3, 'Location')
     worksheet.write(0, 4, 'Link')
+    worksheet.write(0, 5, 'Skills->')
     return(workbook,worksheet)
 
 # Write job offers to worksheet, starting from specified row
 def writeToTable(worksheet,results,start):
-# Iterate through results(job), parse specific data and write to file
+    # Iterate through results(job), parse specific data and write to file
     for i,job in enumerate(results,start = start):
-# Find and write job title to column 0
+    # Find and write job title to column 0
         worksheet.write(i, 0, (job.find('h3', class_ = 'posting-title__position color-main ng-star-inserted')).get_text())
-# Find salary range and conver it to 'start' and 'end' values, if its strict - write value at both cells(1 and 2 columns)
+    # Find salary range and conver it to 'start' and 'end' values, if its strict - write value at both cells(1 and 2 columns)
         varSalary =  (job.find('span', class_ = 'text-truncate badgy salary btn btn-outline-secondary btn-sm ng-star-inserted')).get_text()
         if ('-' in varSalary):
             worksheet.write(i, 1, varSalary[:varSalary.index('-')])
@@ -58,11 +84,16 @@ def writeToTable(worksheet,results,start):
         else:
             worksheet.write(i, 1, varSalary[:varSalary.index('P')])
             worksheet.write(i, 2, varSalary[:varSalary.index('P')])
-# Find and write job location to column 3 
+    # Find and write job location to column 3 
         worksheet.write(i, 3, (job.find('span', class_= 'posting-info__location d-flex align-items-center ml-auto')).get_text())
-# Find and write link of a job to column 4
-        worksheet.write(i, 4, 'https://nofluffjobs.com'+job.get('href'))
-# Returning last row so we can start from end next time
+    # Find and write link of a job to column 4
+        offerLink = 'https://nofluffjobs.com'+job.get('href')
+        worksheet.write(i, 4, offerLink)
+    # Get skill from offers page and write them on row
+        skills = getOfferInfo(offerLink)
+        for j,skill in enumerate(skills,start = 5):
+            worksheet.write(i, j, skill)
+    # Returning last row so we can start from end next time
     return(i)
 
 
@@ -81,4 +112,5 @@ while (True):
     start=writeToTable(worksheet,results,start)+1 #write to file and store last row index, so we can start from that row next iteration
 
 workbook.close() #close our workbook in xlsx file
+print("Done")
 exit(0)
