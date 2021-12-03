@@ -386,3 +386,10 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+
+
+# Trash files still here
+*.sln
+*.pyproj
+*.xlsx
