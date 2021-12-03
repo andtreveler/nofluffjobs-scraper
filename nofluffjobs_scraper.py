@@ -158,7 +158,8 @@ while (True):
     i+=1
     start=writeOffersToTable(offersWorksheet,results,start)+1 #write to file and store last row index, so we can start from that row next iteration
 
-# Write statistic to other page
+# Write statistic to other page. Pass sorted dict with skill:count by desc
+skillStats = dict(sorted(skillStats.items(), key = lambda x: x[1], reverse = True))
 writeStatistic(statsWorksheet,skillStats,chart)
 
 workbook.close() #close our workbook in xlsx file
