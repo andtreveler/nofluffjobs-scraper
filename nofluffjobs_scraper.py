@@ -17,7 +17,13 @@ Link = 'https://nofluffjobs.com/jobs/remote?criteria=seniority%3Djunior&page='
 def getPageOffers(pageNumber):
 # Get page content
     URL = Link + str(pageNumber)
-    page = requests.get(URL)
+    while (True):
+        try:
+            page = requests.get(URL)
+            break
+        except:
+            print("Error while getting page content. Will wait 2 second and try again")
+            sleep(5)
 # Parse content by tag 'a' and id that contains 'nfjPostingListItem-'
     soup = BeautifulSoup(page.content,'html.parser')
     results = soup.find_all('a',id = re.compile('^nfjPostingListItem-'))
@@ -73,6 +79,6 @@ while (True):
     print("Got",i,"pages. Still going, please wait!")
     i+=1
     start=writeToTable(worksheet,results,start)+1 #write to file and store last row index, so we can start from that row next iteration
-    sleep(2) #just in case of block from site
+
 workbook.close() #close our workbook in xlsx file
 exit(0)
