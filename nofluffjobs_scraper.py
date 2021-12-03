@@ -7,7 +7,7 @@ import requests
 # link to search without page number
 # maybe should get it as args for script
 global Link
-Link = 'https://nofluffjobs.com/jobs/remote/frontend?criteria=seniority%3Djunior&page='
+Link = 'https://nofluffjobs.com/jobs/frontend?page='
 
 # count of each technology that required
 global skillStats
