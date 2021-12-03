@@ -7,7 +7,7 @@ import requests
 # link to search without page number
 # maybe should get it as args for script
 global Link
-Link = 'https://nofluffjobs.com/jobs/frontend?page='
+Link = 'https://nofluffjobs.com/jobs/remote/frontend?criteria=seniority%3Djunior&page='
 
 # count of each technology that required
 global skillStats
@@ -53,7 +53,6 @@ def getOfferInfo(URL):
     results2 = soup.find_all('button',class_='btn btn-outline-success btn-sm no-cursor text-truncate')
     for result in results2:
         skills.append((result.get_text()).lower())
-
     # Return skills set
     return(skills)
 
@@ -95,16 +94,22 @@ def writeOffersToTable(worksheet,results,start):
     # Find and write job title to column 0
         worksheet.write(i, 0, (job.find('h3', class_ = 'posting-title__position color-main ng-star-inserted')).get_text())
     # Find salary range and conver it to 'start' and 'end' values, if its strict - write value at both cells(1 and 2 columns)
+        exceptionSalary = False
         try:
             varSalary =  (job.find('span', class_ = 'text-truncate badgy salary btn btn-outline-secondary btn-sm ng-star-inserted')).get_text()
         except:
             varSalary = '0'
-        if ('-' in varSalary):
-            worksheet.write(i, 1, varSalary[:varSalary.index('-')])
-            worksheet.write(i, 2, varSalary[varSalary.index('-')+1:varSalary.index('P')])
+            exceptionSalary = True
+        if (exceptionSalary):
+            worksheet.write(i, 1, varSalary)
+            worksheet.write(i, 2, varSalary)
         else:
-            worksheet.write(i, 1, varSalary[:varSalary.index('P')])
-            worksheet.write(i, 2, varSalary[:varSalary.index('P')])
+            if ('-' in varSalary):
+                worksheet.write(i, 1, varSalary[:varSalary.index('-')])
+                worksheet.write(i, 2, varSalary[varSalary.index('-')+1:varSalary.index('P')])
+            else:
+                worksheet.write(i, 1, varSalary[:varSalary.index('P')])
+                worksheet.write(i, 2, varSalary[:varSalary.index('P')])
     # Find and write job location to column 3 
         worksheet.write(i, 3, (job.find('span', class_= 'posting-info__location d-flex align-items-center ml-auto')).get_text())
     # Find and write link of a job to column 4
@@ -114,8 +119,8 @@ def writeOffersToTable(worksheet,results,start):
         skills = getOfferInfo(offerLink)
         for j,skill in enumerate(skills,start = 5):
             worksheet.write(i, j, skill)
-    # While iteratin through skills lets gather statistic
-        calculateSkillsStats(skill)
+        # While iteratin through skills lets gather statistic
+            calculateSkillsStats(skill)
     # Returning last row so we can start from end next time
     return(i)
 
@@ -130,8 +135,8 @@ def writeStatistic(worksheet,skillStats,chart):
     x = len(skillStats)
 
     # Determine range for cells (value and label)
-    addrValue = '=Sheet2!$B$2:$B$'+str(x)
-    addrCat = '=Sheet2!$A$2:$A$'+str(x)
+    addrValue = '=Statistic!$B$2:$B$'+str(x)
+    addrCat = '=Statistic!$A$2:$A$'+str(x)
 
     # Make chart
     chart.add_series({
