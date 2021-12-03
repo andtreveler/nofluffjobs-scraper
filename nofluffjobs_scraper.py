@@ -4,11 +4,6 @@ import re
 import xlsxwriter
 import requests
 
-#help me refactor it please
-
-#need to OOP?
-
-
 # link to search without page number
 # maybe should get it as args for script
 global Link
@@ -75,8 +70,8 @@ def initializeTable():
     workbook = xlsxwriter.Workbook('jobs.xlsx')
 
     # Add worksheet
-    offersWorksheet = workbook.add_worksheet()
-    statsWorksheet = workbook.add_worksheet()
+    offersWorksheet = workbook.add_worksheet('Jobs')
+    statsWorksheet = workbook.add_worksheet('Statistic')
 
     # Add chart
     chart = workbook.add_chart({'type':'pie'})
