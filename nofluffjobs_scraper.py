@@ -119,7 +119,7 @@ def writeOffersToTable(worksheet,results,start):
         skills = getOfferInfo(offerLink)
         for j,skill in enumerate(skills,start = 5):
             worksheet.write(i, j, skill)
-        # While iteratin through skills lets gather statistic
+            # While iteratin through skills lets gather statistic
             calculateSkillsStats(skill)
     # Returning last row so we can start from end next time
     return(i)
