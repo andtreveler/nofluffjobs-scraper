@@ -7,7 +7,7 @@ import requests
 # link to search without page number
 # maybe should get it as args for script
 global Link
-Link = 'https://nofluffjobs.com/jobs/devops?criteria=seniority%3Djunior&page='
+Link = 'https://nofluffjobs.com/jobs/frontend?page='
 
 # count of each technology that required
 global skillStats
@@ -95,7 +95,10 @@ def writeOffersToTable(worksheet,results,start):
     # Find and write job title to column 0
         worksheet.write(i, 0, (job.find('h3', class_ = 'posting-title__position color-main ng-star-inserted')).get_text())
     # Find salary range and conver it to 'start' and 'end' values, if its strict - write value at both cells(1 and 2 columns)
-        varSalary =  (job.find('span', class_ = 'text-truncate badgy salary btn btn-outline-secondary btn-sm ng-star-inserted')).get_text()
+        try:
+            varSalary =  (job.find('span', class_ = 'text-truncate badgy salary btn btn-outline-secondary btn-sm ng-star-inserted')).get_text()
+        except:
+            varSalary = '0'
         if ('-' in varSalary):
             worksheet.write(i, 1, varSalary[:varSalary.index('-')])
             worksheet.write(i, 2, varSalary[varSalary.index('-')+1:varSalary.index('P')])
