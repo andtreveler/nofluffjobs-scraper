@@ -7,7 +7,7 @@ import requests
 # link to search without page number
 # maybe should get it as args for script
 global Link
-Link = 'https://nofluffjobs.com/jobs/frontend?page='
+Link = 'https://nofluffjobs.com/jobs/python?criteria=seniority%3Djunior&page='
 
 # count of each technology that required
 global skillStats
@@ -24,10 +24,11 @@ def getPageOffers(pageNumber):
             break
         except:
             print("Error while getting page content. Will wait 2 second and try again")
-            sleep(5)
+            sleep(2)
     # Parse content by tag 'a' and id that contains 'nfjPostingListItem-' - it is job offers
     soup = BeautifulSoup(page.content,'html.parser')
     results = soup.find_all('a',id = re.compile('^nfjPostingListItem-'))
+    print("Found",len(results),"offers.")
     # Return finded offers 
     return(results)
 
@@ -40,7 +41,7 @@ def getOfferInfo(URL):
             break
         except:
             print("Error while getting page content. Will wait 2 second and try again")
-            sleep(5)
+            sleep(2)
     soup = BeautifulSoup(page.content,'html.parser')
     skills = []
     # Parse content of requirements block
@@ -91,6 +92,7 @@ def initializeTable():
 def writeOffersToTable(worksheet,results,start):
     # Iterate through results(job), parse specific data and write to file
     for i,job in enumerate(results,start = start):
+        print("Parsing",i,"job required skills.")
     # Find and write job title to column 0
         worksheet.write(i, 0, (job.find('h3', class_ = 'posting-title__position color-main ng-star-inserted')).get_text())
     # Find salary range and conver it to 'start' and 'end' values, if its strict - write value at both cells(1 and 2 columns)
@@ -157,7 +159,7 @@ while (True):
     results = getPageOffers(i)
     if (len(results) == 0):
         break
-    print("Got",i,"pages. Still going, please wait!")
+    print("Parsing offers on",i,"page. Still going, please wait!")
     i+=1
     start=writeOffersToTable(offersWorksheet,results,start)+1 #write to file and store last row index, so we can start from that row next iteration
 
